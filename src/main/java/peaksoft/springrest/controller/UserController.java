@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import peaksoft.springrest.dto.CompanyResponseView;
+import peaksoft.springrest.dto.UserResponseView;
 import peaksoft.springrest.service.UserService;
 import peaksoft.springrest.dto.UserRequest;
 import peaksoft.springrest.dto.UserResponse;
@@ -19,8 +21,10 @@ public class UserController {
     @GetMapping("/teachers")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @Operation(summary = "Get all teachers", description = "Only ADMIN!")
-    public List<UserResponse> getAllTeachers() {
-        return service.getAllTeachers();
+    public UserResponseView getAllTeachers(@RequestParam(name = "text", required = false) String text,
+                                      @RequestParam int page,
+                                      @RequestParam int size){
+        return service.searchAndPaginationTeacher(text, page, size);
     }
     @GetMapping("/users")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
@@ -28,11 +32,14 @@ public class UserController {
     public List<UserResponse> getAllUsers() {
         return service.getAllUsers();
     }
+
     @GetMapping("/students")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'INSTRUCTOR')")
     @Operation(summary = "Get all students", description = "Only ADMIN!")
-    public List<UserResponse> getAllStudents() {
-        return service.getAllStudents();
+    public UserResponseView getAllStudents(@RequestParam(name = "text", required = false) String text,
+                                           @RequestParam int page,
+                                           @RequestParam int size){
+        return service.searchAndPaginationStudent(text, page, size);
     }
     @GetMapping("{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'INSTRUCTOR')")

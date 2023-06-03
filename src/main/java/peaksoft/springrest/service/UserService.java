@@ -3,13 +3,15 @@ package peaksoft.springrest.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import peaksoft.springrest.dto.UserRequest;
-import peaksoft.springrest.dto.UserResponse;
+import peaksoft.springrest.dto.*;
+import peaksoft.springrest.model.Company;
 import peaksoft.springrest.model.Role;
 import peaksoft.springrest.model.User;
 import peaksoft.springrest.repository.CourseRepo;
@@ -181,6 +183,33 @@ public class UserService {
                 .lastName(request.getLastName())
                 .createdDate(LocalDate.now())
                 .email(request.getEmail()).build();
+    }
+    public List<UserResponse> view(List<User> users) {
+        List<UserResponse> responses = new ArrayList<>();
+        for (User user : users) {
+            responses.add(mapToResponse(user));
+        }
+        return responses;
+    }
+    public UserResponseView searchAndPaginationTeacher(String text, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        UserResponseView userResponseView = new UserResponseView();
+        userResponseView.setUserResponses(view(searchTeacher(text, pageable)));
+        return userResponseView;
+    }
+    public UserResponseView searchAndPaginationStudent(String text, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        UserResponseView userResponseView = new UserResponseView();
+        userResponseView.setUserResponses(view(searchStudent(text, pageable)));
+        return userResponseView;
+    }
+    public List<User> searchTeacher(String text, Pageable pageable) {
+        text = (text == null) ? "" : text;
+        return userRepository.searchAndPaginationForTeachers(text, pageable);
+    }
+    public List<User> searchStudent(String text, Pageable pageable) {
+        text = (text == null) ? "" : text;
+        return userRepository.searchAndPaginationForStudents(text, pageable);
     }
 
 }
