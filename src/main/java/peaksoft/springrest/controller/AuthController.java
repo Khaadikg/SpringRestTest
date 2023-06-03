@@ -34,9 +34,9 @@ public class AuthController {
     @Operation(summary = "signing in", description = "entering site first time")
     public LoginResponse signIn(@RequestBody LoginRequest loginRequest) {
         UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
         authenticationManager.authenticate(token);
-        User user = userRepo.findByUsername(token.getName()).get();
+        User user = userRepo.findByEmail(token.getName()).get();
         return loginMapper.loginView(jwtTokenUtil.generateToken(user), "Successful", user);
     }
 }
