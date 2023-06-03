@@ -1,0 +1,15 @@
+Spring Boot MVC проектти REST проектке откорунуз(Controller->RestController).
+
+User-(id, email, password, firstName, lastName, createdDate, studyFormat, course, group)
+Role(enum)-(ADMIN, INSTRUCTOR,STUDENT).
+Teacher, Student класстар болбойт, баардыгы User менен журот.
+Эгер role STUDENT болсо- group алат, course бош калат.
+Эгер role INSTRUCTOR болсо- course алат, group бош калат.(Доступ мурункудай эле)
+Эгер role ADMIN болсо- addStudent жана addTeacher деп жаны user кошо алат. Кошуп жатканда рольдору по умолчанию болуш керек.(addStudent role(STUDENT), addTeacher role(INSTRUCTOR)болуп калыш керек.
+Логин(email, password) жана регистрация болуш керек- Регистрация болуп киргенде role(STUDENT) по умолчанию болот.
+Teacher жана Student учун мурунку баардык CRUD аткарылат.
+Teacher-(addTeacher, getAllTeachers, getTeacherById, updateTeacher, deleteTeacher)
+Student-(addStudent, getAllStudents, getStudentById, updateStudent, deleteStudent)
+
+Jwt Token жана Swagger кошулат.
+searchAndPagination методун кошунуз!
