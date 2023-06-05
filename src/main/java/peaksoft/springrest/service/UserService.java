@@ -102,6 +102,7 @@ public class UserService {
     }
 
     public UserResponse updateStudent(Long id, UserRequest request) {
+
         User user = new User();
         try {
             user = userRepository.findById(id).get();
@@ -111,6 +112,7 @@ public class UserService {
         } catch (NoSuchElementException e) {
             log.error("No such user found by id = " + id + "!");
         }
+//        User.builder()
         user.setUsername(request.getUsername());
         user.setPassword(encoder.encode(request.getPassword()));
         user.setRole(Role.valueOf(request.getRoleName()));

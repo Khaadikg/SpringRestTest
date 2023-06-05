@@ -24,14 +24,6 @@ public class GroupService {
     private final GroupRepo groupRepo;
     private final CourseRepo courseRepo;
     private final UserRepo userRepo;
-
-    public List<GroupResponse> getAllGroups() {
-        List<GroupResponse> groupResponses = new ArrayList<>();
-        for (Group group : groupRepo.findAll()) {
-            groupResponses.add(mapToResponse(group));
-        }
-        return groupResponses;
-    }
     public GroupResponse saveGroup(GroupRequest request) {
         return mapToResponse(groupRepo.save(mapToGroup(request)));
     }
@@ -44,58 +36,73 @@ public class GroupService {
         return "Successfully deleted group " + group.getGroupName() + " !";
     }
     public GroupResponse updateGroup(Long id, GroupRequest request) {
-        Group group = groupRepo.findById(id).get();
+        Group group = new Group();
+        try {
+            group = groupRepo.findById(id).get();
+        } catch (NullPointerException e) {
+            log.error("No such group found by id = " + id);
+        }
         group.setGroupName(request.getGroupName());
         group.setDateStart(request.getDateStart());
         group.setDateFinish(request.getDateFinish());
+        List<Course> courses = null;
+        List<User> students = null;
+        try {
+            courses.add(courseRepo.findCourseByCourseName(request.getCourseName()));
+        } catch (NoSuchElementException e) {
+            log.error("Such course by name = " + request.getCourseName() + " does not exist!");
+        }
+        try {
+            students = userRepo.getUsersByGroup(request.getGroupName());
+        } catch (NoSuchElementException e) {
+            log.error("Student: Group by name = " + request.getCourseName() + " does not exist!");
+        }
         try {
             group.setCourseId(courseRepo.findCourseByCourseName(request.getCourseName()).getId());
         } catch (NullPointerException e) {
             log.error("Such course <" +request.getCourseName() +"> does not exist!");
         }
-        List<Course> courses = new ArrayList<>();
+        // filling with courses
         courses.add(courseRepo.findCourseByCourseName(request.getCourseName()));
         group.setCourses(courses);
-        // filling with student users
-        List<User> students = userRepo.getUsersByGroup(groupRepo.findByGroupName(request.getCourseName()));
+        // filling with student (users)
         group.setStudents(students);
         return mapToResponse(groupRepo.save(group));
     }
     public GroupResponse mapToResponse(Group group) {
-        GroupResponse response = new GroupResponse();
-        response.setId(group.getId());
-        response.setGroupName(group.getGroupName());
-        response.setDateStart(group.getDateStart());
-        response.setDateFinish(group.getDateFinish());
+        String courseName = null;
         try {
-            response.setCourseName(courseRepo.findById(group.getCourseId()).get().getCourseName());
+            courseName = courseRepo.findById(group.getCourseId()).get().getCourseName();
         } catch (Exception e) {
             log.error("Check for illegal argument! OR Your DB has no such course!");
         }
-        return response;
+            return GroupResponse.builder()
+                    .id(group.getId())
+                    .groupName(group.getGroupName())
+                    .dateStart(group.getDateStart())
+                    .dateFinish(group.getDateFinish())
+                    .courseName(courseName).build();
     }
     public Group mapToGroup(GroupRequest request) {
-        Group group = new Group();
-        group.setGroupName(request.getGroupName());
-        group.setDateStart(request.getDateStart());
-        group.setDateFinish(request.getDateFinish());
         List<Course> courses = new ArrayList<>();
-        group.setCourses(courses);
+        List<User> students = new ArrayList<>();
         try {
             courses.add(courseRepo.findCourseByCourseName(request.getCourseName()));
         } catch (NoSuchElementException e) {
             log.error("Such course by name " + request.getCourseName() + "does not exist!");
         }
-        List<User> students = new ArrayList<>();
         try {
-            students = userRepo.getUsersByGroup(groupRepo.findByGroupName(request.getGroupName()));
+            students = userRepo.getUsersByGroup(request.getGroupName());
         } catch (NoSuchElementException e) {
             log.error("No such students found by group name = " + request.getCourseName());
         }
-        group.setStudents(students);
-
-        group.setCourseId(courseRepo.findCourseByCourseName(request.getCourseName()).getId());
-        return group;
+        return Group.builder()
+                .groupName(request.getGroupName())
+                .dateStart(request.getDateStart())
+                .dateFinish(request.getDateFinish())
+                .courses(courses)
+                .students(students)
+                .courseId(courseRepo.findCourseByCourseName(request.getCourseName()).getId()).build();
     }
 
     public List<GroupResponse> view(List<Group> groups) {

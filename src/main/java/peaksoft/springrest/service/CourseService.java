@@ -55,21 +55,23 @@ public class CourseService {
         return mapToResponse(course);
     }
     public Course mapToCourse(CourseRequest request) {
-        Course course = new Course();
-        course.setCourseName(request.getCourseName());
-        course.setDurationMonth(request.getDurationMonth());
-//        course.setCompanyId(companyRepo.getCompanyByCompanyName(request.getCompanyName()).getId());
-        course.setCompany(companyRepo.getCompanyByCompanyName(request.getCompanyName()));
-        return course;
+        Company company = new Company();
+        try {
+            company = companyRepo.getCompanyByCompanyName(request.getCompanyName());
+        } catch (NoSuchElementException e) {
+            log.error("Course: No such company = " + request.getCompanyName());
+        }
+        return Course.builder()
+                .courseName(request.getCourseName())
+                .durationMonth(request.getDurationMonth())
+                .company(company)
+                .companyId(company.getId()).build();
     }
     public CourseResponse mapToResponse(Course course){
-        CourseResponse response = new CourseResponse();
-        response.setId(course.getId());
-        response.setCourseName(course.getCourseName());
-//        response.setTeacher(course.getTeacher().getFirstName() + course.getTeacher().getFirstName());
-//        response.setCompany(course.getCompany().getCompanyName());
-        response.setDurationMonth(course.getDurationMonth());
-        return response;
+        return CourseResponse.builder()
+                .id(course.getId())
+                .courseName(course.getCourseName())
+                .durationMonth(course.getDurationMonth()).build();
     }
     public List<CourseResponse> view(List<Course> courses) {
         List<CourseResponse> responses = new ArrayList<>();

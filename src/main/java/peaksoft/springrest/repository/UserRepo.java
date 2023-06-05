@@ -14,7 +14,8 @@ import java.util.Optional;
 public interface UserRepo extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
-    List<User> getUsersByGroup(Group group);
+    @Query("select u from User u where u.group.groupName = :groupName")
+    List<User> getUsersByGroup(@Param("groupName") String groupName);
     @Query("select u from User u " +
             "where lower(concat(u.firstName, u.lastName)) like lower(concat('%',:text,'%')) and  u.role = 'INSTRUCTOR'")
     List<User> searchAndPaginationForTeachers(@Param("text") String text, Pageable pageable);

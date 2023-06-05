@@ -21,21 +21,11 @@ import java.util.NoSuchElementException;
 @Slf4j
 public class CompanyService {
     private final CompanyRepo companyRepo;
-
-    public List<CompanyResponse> getAllCompanies(){
-        List<CompanyResponse> companyResponse = new ArrayList<>();
-        List<Company> companyList = companyRepo.findAll();
-        for(Company company: companyList) {
-            companyResponse.add(mapToResponse(company));
-        }
-        return companyResponse;
-    }
-
     public CompanyResponse getCompanyById(Long id){
         Company company = new Company();
         try {
              company = companyRepo.findById(id).get();
-        } catch (NoSuchElementException e) {
+        } catch (Exception e) {
             log.error("No such company found by id = " + id);
         }
         return mapToResponse(company);
@@ -57,8 +47,13 @@ public class CompanyService {
         return mapToResponse(companyRepo.save(company));
     }
 
-    public void deleteCompany(Long companyId) {
-        companyRepo.deleteById(companyId);
+    public String deleteCompany(Long companyId) {
+        try {
+            companyRepo.deleteById(companyId);
+        } catch (Exception e) {
+            log.error("No such company found by id = " + companyId);
+        }
+        return "Successfully deleted company!";
     }
     public void deleteCompany(Company company) {
         companyRepo.delete(company);
@@ -66,22 +61,20 @@ public class CompanyService {
 
     public Company mapToCompany(CompanyRequest request){
         // что нужно принять от пользователя
-        Company company = new Company();
-        company.setCompanyName(request.getCompanyName());
-        company.setLocatedCountry(request.getLocatedCountry());
-        company.setOwner(request.getOwner());
-        company.setDate(LocalDate.now());
-        return company;
+        return Company.builder()
+                .companyName(request.getCompanyName())
+                .locatedCountry(request.getLocatedCountry())
+                .owner(request.getOwner())
+                .date(LocalDate.now()).build();
     }
     public CompanyResponse mapToResponse(Company company){
         // что нужно показать пользователю
-        CompanyResponse response = new CompanyResponse();
-        response.setId(company.getId());
-        response.setCompanyName(company.getCompanyName());
-        response.setLocatedCountry(company.getLocatedCountry());
-        response.setOwner(company.getOwner());
-        response.setDate(company.getDate());
-        return response;
+        return CompanyResponse.builder()
+                .id(company.getId())
+                .companyName(company.getCompanyName())
+                .locatedCountry(company.getLocatedCountry())
+                .owner(company.getOwner())
+                .date(company.getDate()).build();
     }
 
     public List<CompanyResponse> view(List<Company> companies) {
