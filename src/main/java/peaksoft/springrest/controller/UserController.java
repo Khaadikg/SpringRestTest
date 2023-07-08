@@ -3,13 +3,16 @@ package peaksoft.springrest.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.springrest.dto.CompanyResponseView;
 import peaksoft.springrest.dto.UserResponseView;
+import peaksoft.springrest.model.User;
 import peaksoft.springrest.service.UserService;
 import peaksoft.springrest.dto.UserRequest;
 import peaksoft.springrest.dto.UserResponse;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -18,6 +21,11 @@ import java.util.List;
 @PreAuthorize("hasAnyAuthority('ADMIN','INSTRUCTOR')")
 public class UserController {
     private final UserService service;
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @GetMapping("/me")
+    public User getMe(Principal principal){
+        return service.getMe(principal);
+    }
     @GetMapping("/teachers")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @Operation(summary = "Get all teachers", description = "Only ADMIN!")

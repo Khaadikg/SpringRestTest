@@ -1,12 +1,15 @@
 package peaksoft.springrest.model;
 
 import lombok.*;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -33,6 +36,8 @@ public class User implements UserDetails {
     private LocalDate createdDate;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @Email
+    @NotEmpty(message = "Email cannot be empty")
     private String email;
 
     /*BLOCK OF GROUPS FIELDS*/

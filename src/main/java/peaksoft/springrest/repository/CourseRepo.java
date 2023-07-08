@@ -17,6 +17,9 @@ public interface CourseRepo extends JpaRepository<Course, Long> {
 
     @Query("select c from Course c where lower(c.courseName) like lower(:text) ")
     Course findCourseByCourseName(@Param("text") String name);
+
+//    @Query
+//    List<Course> findCoursesByGroupId(Long groupId);
     Course findCourseById(Long id);
     @Query("select c from Course c " +
             "where lower(c.courseName) like lower(concat('%',:text,'%'))")

@@ -7,7 +7,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import peaksoft.springrest.dto.*;
@@ -18,6 +20,7 @@ import peaksoft.springrest.repository.CourseRepo;
 import peaksoft.springrest.repository.GroupRepo;
 import peaksoft.springrest.repository.UserRepo;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +38,10 @@ public class UserService {
     private final CourseRepo courseRepo;
 
     private final BCryptPasswordEncoder encoder;
+    public User getMe(Principal principal) {
+        System.out.println(principal.getName());
+        return (User) ((Authentication) principal).getPrincipal();
+    }
 
     public UserResponse createStudent(UserRequest request) {
         User user = mapToUser(request);
@@ -62,25 +69,10 @@ public class UserService {
         user.setRole(Role.ADMIN);
         return mapToResponse(userRepository.save(user));
     }
-    public List<UserResponse> getAllStudents() {
-        List<UserResponse> userResponses = new ArrayList<>();
-        for (User user : userRepository.findAll()) {
-            if (user.getRole() == Role.STUDENT) userResponses.add(mapToResponse(user));
-        }
-        return userResponses;
-    }
     public List<UserResponse> getAllUsers() {
         List<UserResponse> userResponses = new ArrayList<>();
         for (User user : userRepository.findAll()) {
             userResponses.add(mapToResponse(user));
-        }
-        return userResponses;
-    }
-
-    public List<UserResponse> getAllTeachers() {
-        List<UserResponse> userResponses = new ArrayList<>();
-        for (User user : userRepository.findAll()) {
-            if (user.getRole() == Role.INSTRUCTOR) userResponses.add(mapToResponse(user));
         }
         return userResponses;
     }
@@ -101,6 +93,9 @@ public class UserService {
         return (mapToResponse(user));
     }
 
+    /////////////////////////
+    /// ISLAND OF UPDATES ///
+    /////////////////////////
     public UserResponse updateStudent(Long id, UserRequest request) {
 
         User user = new User();
@@ -137,13 +132,13 @@ public class UserService {
         } catch (NoSuchElementException e) {
             log.error("No such user found by id = " + id + "!");
         }
-        user.setUsername(request.getUsername());
-        user.setPassword(encoder.encode(request.getPassword()));
         try {
             user.setRole(Role.valueOf(request.getRoleName()));
         } catch (NullPointerException e) {
             log.error("Request does not have given ROLE!");
         }
+        user.setUsername(request.getUsername());
+        user.setPassword(encoder.encode(request.getPassword()));
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
@@ -156,6 +151,7 @@ public class UserService {
         return mapToResponse(userRepository.save(user));
     }
 
+    // easy comes easy goes , is deletion work any time who knows //
     public String delete(Long id) {
         try {
             userRepository.deleteById(id);
@@ -193,6 +189,10 @@ public class UserService {
         }
         return responses;
     }
+
+    ///////////////////////////
+    /// BLOCK OF PAGINATION ///
+    ///////////////////////////
     public UserResponseView searchAndPaginationTeacher(String text, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         UserResponseView userResponseView = new UserResponseView();

@@ -10,6 +10,8 @@ import peaksoft.springrest.dto.CompanyRequest;
 import peaksoft.springrest.dto.CompanyResponse;
 import peaksoft.springrest.dto.CompanyResponseView;
 
+import java.security.Principal;
+
 @RestController
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('ADMIN')")
@@ -36,9 +38,17 @@ public class CompanyController {
     }
     @PutMapping("{id}")
     @Operation(summary = "Update company", description = "Only ADMIN!")
-    public CompanyResponse update(@PathVariable("id")Long id, @RequestBody CompanyRequest companyRequest) {
+    public CompanyResponse update(@PathVariable("id")Long id,
+                                  @RequestBody CompanyRequest companyRequest) {
         return service.updateCompany(id, companyRequest);
     }
+//    @PutMapping("{id}")
+//    @Operation(summary = "Update company", description = "Only ADMIN!")
+//    public CompanyResponse updated(@PathVariable("id")Long id,
+//                                   @PathVariable("ownerId")Long ownerId,
+//                                   @RequestBody CompanyRequest companyRequest) {
+//        return service.updateCompany(id, companyRequest);
+//    }
 
     @DeleteMapping("{id}")
     @Operation(summary = "Delete company", description = "Only ADMIN!")

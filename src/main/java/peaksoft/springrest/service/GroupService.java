@@ -24,7 +24,7 @@ public class GroupService {
     private final GroupRepo groupRepo;
     private final CourseRepo courseRepo;
     private final UserRepo userRepo;
-    public GroupResponse saveGroup(GroupRequest request) {
+    public GroupResponse saveGroup(GroupRequest request)  {
         return mapToResponse(groupRepo.save(mapToGroup(request)));
     }
     public GroupResponse getGroupById(Long groupId) {
